@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class AbilityManager : MonoBehaviour
 {
-    private IAbility currentAbility;
+    public IAbility currentAbility;
     private Rigidbody2D body;
     private SpriteRenderer sprite;
 
@@ -55,10 +55,26 @@ public class AbilityManager : MonoBehaviour
         Debug.Log("Переключено на Огонь");
     }
 
+    public void SwitchToWaterAbility()
+    {
+        if (currentAbility is WaterAbility)
+            return;
+
+        RemoveCurrentAbility();
+
+        var waterAbility = gameObject.AddComponent<WaterAbility>();
+        waterAbility.Init(body, sprite);
+        currentAbility = waterAbility;
+
+        Debug.Log("Переключено на Воду");
+    }
+
+
     private void RemoveCurrentAbility()
     {
         if (currentAbility != null)
         {
+            currentAbility.OnExit();
             Destroy(currentAbility as MonoBehaviour);
             currentAbility = null;
         }

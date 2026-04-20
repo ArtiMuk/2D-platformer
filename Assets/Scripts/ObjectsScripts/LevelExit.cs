@@ -22,7 +22,9 @@ public class Exit : MonoBehaviour
         {
             nextScene = 0;
         }
-            
+
+        PlayerPrefs.SetInt("LastLevel", nextScene != 0 ? currentScene : LevelSelectUI.totalLevels);
+        PlayerPrefs.Save();
 
         SceneManager.LoadScene(nextScene);
     }

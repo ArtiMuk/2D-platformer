@@ -31,7 +31,7 @@ public class Hero : MonoBehaviour // Главный класс героя, на�
     {
         float horizontalInput = Input.GetAxis("Horizontal"); // Получаем ввод по горизонтали
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput)); // Устанавливаем параметр "Speed" в Animator
-        animator.SetFloat("VerticalVelocity", body.velocity.y); // Передаем вертикальную скорость в Animator
+        animator.SetFloat("VerticalVelocity", body.linearVelocity.y); // Передаем вертикальную скорость в Animator
 
         if (horizontalInput != 0) // Проверка: есть ли ввод по горизонтали
             Run(horizontalInput); // Вызываем метод движения, передаем ввод
@@ -47,6 +47,9 @@ public class Hero : MonoBehaviour // Главный класс героя, на�
 
         if (Input.GetKeyDown(KeyCode.Alpha3))
             abilityManager.SwitchToFireAbility();
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+            abilityManager.SwitchToWaterAbility();
 
         abilityManager.UpdateAbility();
     }
@@ -78,22 +81,28 @@ public class Hero : MonoBehaviour // Главный класс героя, на�
         RaycastHit2D hit = Physics2D.Raycast((Vector2)transform.position + Vector2.up * 0.5f, direction, 0.4f, LayerMask.GetMask("Wall", "Neidi")); //Проверяем что перед героем нет стены
 
         if (hit.collider == null)
+        {
             transform.position = Vector3.MoveTowards(transform.position, transform.position + direction, speed * Time.deltaTime); // Перемещаем героя
+        }
         else
             body.linearVelocity = new Vector2(0, body.linearVelocity.y);
 
         sprite.flipX = direction.x < 0.0f; // Отражаем спрайт влево, если идём налево
     }
 
-    private void CheckIsOnGround() // Проверяем, стоит ли герой на земле
+    private void CheckIsOnGround()
     {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.3f); // Проверяем коллайдеры вокруг позиции героя
-        bool wasGrounded = isOnGround; // Сохраняем старое состояние
-        isOnGround = colliders.Length > 1; // Если больше одного коллайдера — герой стоит на земле
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.3f);
+        bool wasGrounded = isOnGround;
+        isOnGround = colliders.Length > 1;
 
-        if (!wasGrounded && isOnGround) // Если только что приземлился
+        if (!wasGrounded && isOnGround)
         {
-            abilityManager.LandAbility(); // Сообщаем способности о приземлении
+            abilityManager.LandAbility();
+            // При необходимости способности обрабатывают OnLand внутри себя
         }
     }
+
+    // Для внешнего доступа к состоянию "на земле"
+    public bool IsOnGround() => isOnGround;
 }
