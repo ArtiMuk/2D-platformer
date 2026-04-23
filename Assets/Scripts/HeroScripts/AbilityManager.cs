@@ -5,15 +5,22 @@ public class AbilityManager : MonoBehaviour
     public IAbility currentAbility;
     private Rigidbody2D body;
     private SpriteRenderer sprite;
+    private Hero hero;
 
     public void Init(Rigidbody2D rb, SpriteRenderer sr)
     {
         body = rb;
         sprite = sr;
+        hero = GetComponent<Hero>();
     }
 
     public void SwitchToEarthAbility()
     {
+        if (currentAbility is WaterAbility waterPuddle && waterPuddle.IsInPuddleForm())
+        {
+            Debug.Log("Cannot switch ability: Currently in puddle form.");
+            return;
+        }
         if (currentAbility is EarthAbility)
             return;
 
@@ -24,11 +31,17 @@ public class AbilityManager : MonoBehaviour
         earthAbility.SetWallLayer(LayerMask.GetMask("Wall"));
         currentAbility = earthAbility;
 
-        Debug.Log("Переключено на Землю");
+        hero?.SetEarthMode();
+        Debug.Log("РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РЅР° СЂРµР¶РёРј Р·РµРјР»Рё");
     }
 
     public void SwitchToWindAbility()
     {
+        if (currentAbility is WaterAbility waterPuddle && waterPuddle.IsInPuddleForm())
+        {
+            Debug.Log("Cannot switch ability: Currently in puddle form.");
+            return;
+        }
         if (currentAbility is WindAbility)
             return;
 
@@ -38,11 +51,17 @@ public class AbilityManager : MonoBehaviour
         windAbility.Init(body, sprite);
         currentAbility = windAbility;
 
-        Debug.Log("Переключено на Ветер");
+        hero?.SetWindMode();
+        Debug.Log("РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РЅР° СЂРµР¶РёРј РІРµС‚СЂР°");
     }
 
     public void SwitchToFireAbility()
     {
+        if (currentAbility is WaterAbility waterPuddle && waterPuddle.IsInPuddleForm())
+        {
+            Debug.Log("Cannot switch ability: Currently in puddle form.");
+            return;
+        }
         if (currentAbility is FireAbility)
             return;
 
@@ -50,9 +69,20 @@ public class AbilityManager : MonoBehaviour
 
         var fireAbility = gameObject.AddComponent<FireAbility>();
         fireAbility.Init(body, sprite);
+
+        if (hero != null && hero.fireCheckpointFlagPrefab != null)
+        {
+            fireAbility.SetFlagPrefab(hero.fireCheckpointFlagPrefab);
+        }
+        else
+        {
+            Debug.LogError("AbilityManager: Hero component or hero.fireCheckpointFlagPrefab is null. Cannot set flag prefab for FireAbility.");
+        }
+
         currentAbility = fireAbility;
 
-        Debug.Log("Переключено на Огонь");
+        hero?.SetFireMode();
+        Debug.Log("РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РЅР° СЂРµР¶РёРј РѕРіРЅСЏ");
     }
 
     public void SwitchToWaterAbility()
@@ -64,9 +94,18 @@ public class AbilityManager : MonoBehaviour
 
         var waterAbility = gameObject.AddComponent<WaterAbility>();
         waterAbility.Init(body, sprite);
+        if (hero != null && hero.waterPuddleSprite != null)
+        {
+            waterAbility.SetPuddleSprite(hero.waterPuddleSprite);
+        }
+        else
+        {
+            Debug.LogError("AbilityManager: Hero component or hero.waterPuddleSprite is null. Cannot set puddle sprite for WaterAbility.");
+        }
         currentAbility = waterAbility;
 
-        Debug.Log("Переключено на Воду");
+        hero?.SetWaterMode();
+        Debug.Log("РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РЅР° СЂРµР¶РёРј РІРѕРґС‹");
     }
 
 

@@ -17,6 +17,37 @@ public class Hero : MonoBehaviour // Главный класс героя, на�
 
     private AbilityManager abilityManager; // Менеджер способностей
 
+    [Header("Ability Specific Assets")]
+    [SerializeField] public Sprite waterPuddleSprite;
+
+    [SerializeField] public GameObject fireCheckpointFlagPrefab;
+
+    public enum HeroMode { Default, Wind, Earth, Fire, Water }
+    private HeroMode currentMode = HeroMode.Default;
+
+    private static readonly System.Collections.Generic.Dictionary<HeroMode, Color> modeColors = new()
+    {
+        { HeroMode.Default, Color.white },
+        { HeroMode.Wind, Color.cyan },
+        { HeroMode.Earth, new Color(0.55f, 0.27f, 0.07f) },
+        { HeroMode.Fire, Color.red },
+        { HeroMode.Water, new Color(0.2f, 0.5f, 1f) }
+    };
+
+    public void SetMode(HeroMode mode)
+    {
+        currentMode = mode;
+        if (sprite != null && modeColors.ContainsKey(mode))
+            sprite.color = modeColors[mode];
+    }
+
+    // Для вызова из AbilityManager
+    public void SetWindMode() => SetMode(HeroMode.Wind);
+    public void SetEarthMode() => SetMode(HeroMode.Earth);
+    public void SetFireMode() => SetMode(HeroMode.Fire);
+    public void SetWaterMode() => SetMode(HeroMode.Water);
+    public void SetDefaultMode() => SetMode(HeroMode.Default);
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
