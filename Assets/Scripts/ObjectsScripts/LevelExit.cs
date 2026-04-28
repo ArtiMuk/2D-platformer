@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// Скрипт для обработки выхода/перехода на следующий уровень
 public class Exit : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D other)
@@ -22,9 +23,15 @@ public class Exit : MonoBehaviour
         {
             nextScene = 0;
         }
+        int savedScene = PlayerPrefs.GetInt("LastLevel", 0);
+        if (currentScene > savedScene)
+        {
+            PlayerPrefs.SetInt("LastLevel", currentScene);
+            PlayerPrefs.Save();
 
-        PlayerPrefs.SetInt("LastLevel", nextScene != 0 ? currentScene : LevelSelectUI.totalLevels);
-        PlayerPrefs.Save();
+            // Альтернативный вариант сохранения
+            //PlayerPrefs.SetInt("LastLevel", nextScene != 0 ? currentScene : LevelSelectUI.totalLevels);
+        }
 
         SceneManager.LoadScene(nextScene);
     }

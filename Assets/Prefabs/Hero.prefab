@@ -179,7 +179,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.0000004172325, y: 0.4589568}
+  m_Offset: {x: 0.0000004172325, y: 0.49554563}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -189,7 +189,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.74424875, y: 0.9808896}
+  m_Size: {x: 0.74424875, y: 0.907712}
   m_EdgeRadius: 0
 --- !u!50 &8329485659389994321
 Rigidbody2D:
@@ -232,5 +232,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   jumpForce: 13
-  waterPuddleSprite: {fileID: 1819811312189669638, guid: 872c939837eb61e499817ec1195eba38, type: 3}
+  waterPuddleSprite: {fileID: -5160882468792293898, guid: a24d219ac10e9e84e8940d6b5ddb6d17, type: 3}
   fireCheckpointFlagPrefab: {fileID: 2320282100253839257, guid: b24c2f032995c9340a87c2d7b09ba8c0, type: 3}

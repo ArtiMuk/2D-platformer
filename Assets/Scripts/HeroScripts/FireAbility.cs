@@ -1,19 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class FireAbility : MonoBehaviour, IAbility
 {
+    private static int totalCheckpoints = 0;
+    private static List<Vector3> savedCheckpoints = new List<Vector3>();
+    private static GameObject currentFlag; // Делаем флаг статическим
+    private static int currentSceneIndex = -1; // Индекс текущей сцены
     private Rigidbody2D body;
     private SpriteRenderer sprite;
 
     private GameObject flagPrefab;
-    private GameObject currentFlag;
     private Hero hero;
 
     [SerializeField] private float jumpForce = 13f;
-    [SerializeField] private float speedBoostMultiplier = 2f;
+    [SerializeField] private float speedBoostMultiplier = 3.5f;
     [SerializeField] private float boostDuration = 5f;
-    [SerializeField] private float cooldownDuration = 5f;
+    [SerializeField] private float cooldownDuration = 3f;
 
     private float originalSpeed;
     private bool isBoosting;
@@ -21,7 +25,27 @@ public class FireAbility : MonoBehaviour, IAbility
     private bool isOnCooldown;
     private float cooldownTimer;
 
+    // Локальный список чекпоинтов
     private List<Vector3> checkpoints = new List<Vector3>(3);
+
+    private void OnEnable()
+    {
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        
+        // Сбрасываем чекпоинты только если загружена новая сцена
+        if (sceneIndex != currentSceneIndex)
+        {
+            currentSceneIndex = sceneIndex;
+            totalCheckpoints = 0;
+            savedCheckpoints.Clear();
+            if (currentFlag != null)
+            {
+                Destroy(currentFlag);
+                currentFlag = null;
+            }
+            Debug.Log($"[Fire] Новая сцена загружена, чекпоинты сброшены. Сцена: {sceneIndex}");
+        }
+    }
 
     public void Init(Rigidbody2D rb, SpriteRenderer sr)
     {
@@ -30,12 +54,30 @@ public class FireAbility : MonoBehaviour, IAbility
         hero = rb.GetComponent<Hero>();
         originalSpeed = hero.Speed;
 
-        // Стартовый чекпойнт (позиция старта уровня)
-        checkpoints.Add(hero.transform.position);
-
-        PlaceFlagAt(hero.transform.position);
+        // Восстанавливаем сохраненные чекпоинты
+        checkpoints.Clear();
+        if (savedCheckpoints.Count > 0)
+        {
+            checkpoints.AddRange(savedCheckpoints);
+            // Восстанавливаем флаг на последнем чекпоинте, если его еще нет
+            if (currentFlag == null)
+            {
+                PlaceFlagAt(checkpoints[checkpoints.Count - 1]);
+            }
+        }
+        else
+        {
+            // Стартовый чекпойнт (позиция старта уровня)
+            GameObject startCheck = GameObject.FindGameObjectWithTag("CheckForFire");
+            checkpoints.Add(startCheck.transform.position);
+            if (currentFlag == null)
+            {
+                PlaceFlagAt(hero.transform.position);
+            }
+        }
     }
 
+    // Установка префаба флага
     public void SetFlagPrefab(GameObject prefab)
     {
         flagPrefab = prefab;
@@ -43,11 +85,13 @@ public class FireAbility : MonoBehaviour, IAbility
 
     public void OnUpdate()
     {
+        // Активация ускорения по нажатию E
         if (Input.GetKeyDown(KeyCode.E) && !isBoosting && !isOnCooldown)
         {
             ActivateBoost();
         }
 
+        // Обработка активного ускорения
         if (isBoosting)
         {
             boostTimer -= Time.deltaTime;
@@ -58,6 +102,8 @@ public class FireAbility : MonoBehaviour, IAbility
                 cooldownTimer = cooldownDuration;
             }
         }
+
+        // Обработка перезарядки
         else if (isOnCooldown)
         {
             cooldownTimer -= Time.deltaTime;
@@ -67,9 +113,10 @@ public class FireAbility : MonoBehaviour, IAbility
             }
         }
 
+        // Установка чекпоинта по нажатию RightShift
         if (Input.GetKeyDown(KeyCode.RightShift))
         {
-            if (checkpoints.Count >= 3)
+            if (totalCheckpoints >= 2)
             {
                 Debug.Log("[Fire] Максимум 2 чекпойнта установлено. Новые чекпойнты недоступны.");
                 return;
@@ -77,7 +124,8 @@ public class FireAbility : MonoBehaviour, IAbility
 
             Vector3 newCheckpoint = hero.transform.position;
             checkpoints.Add(newCheckpoint);
-            Debug.Log($"[Fire] Checkpoint set at {newCheckpoint}");
+            totalCheckpoints++;
+            Debug.Log($"[Fire] Checkpoint set at {newCheckpoint}. Всего чекпоинтов: {totalCheckpoints}");
 
             PlaceFlagAt(newCheckpoint);
         }
@@ -92,6 +140,7 @@ public class FireAbility : MonoBehaviour, IAbility
 
     public void OnLand() { }
 
+    // Вызывается при отключении способности
     public void OnExit()
     {
         if (isBoosting)
@@ -101,6 +150,11 @@ public class FireAbility : MonoBehaviour, IAbility
             isOnCooldown = true;
             cooldownTimer = cooldownDuration;
         }
+
+        // Сохраняем чекпоинты при выходе
+        savedCheckpoints.Clear();
+        savedCheckpoints.AddRange(checkpoints);
+        // Не удаляем флаг при выходе
     }
 
     private void ActivateBoost()
@@ -118,15 +172,16 @@ public class FireAbility : MonoBehaviour, IAbility
         Debug.Log("Fire sprint ended.");
     }
 
+    // Получение последнего чекпоинта
     public Vector3 GetCheckpoint()
     {
-        // Возвращаем последний чекпойнт (последний в списке)
         if (checkpoints.Count == 0)
             return hero.transform.position;
 
         return checkpoints[checkpoints.Count - 1];
     }
 
+    // Установка визуального флага чекпоинта
     private void PlaceFlagAt(Vector3 position)
     {
         if (flagPrefab == null)
@@ -142,5 +197,17 @@ public class FireAbility : MonoBehaviour, IAbility
 
         currentFlag = Instantiate(flagPrefab, position + new Vector3(0f, 0.4f, 0f), Quaternion.identity);
         Debug.Log($"[Fire] Флаг установлен на позиции {position}");
+    }
+
+    // Метод для сброса чекпоинтов (можно вызвать при смерти героя)
+    public static void ResetCheckpoints()
+    {
+        totalCheckpoints = 0;
+        savedCheckpoints.Clear();
+        if (currentFlag != null)
+        {
+            Destroy(currentFlag);
+            currentFlag = null;
+        }
     }
 }
