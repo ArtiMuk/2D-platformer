@@ -258,7 +258,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 513016993908548068, guid: 5d2861abd75e51f4c8f9ff1fce3e8431, type: 3}
       propertyPath: m_fontSize
-      value: 44.4
+      value: 41.95
+      objectReference: {fileID: 0}
+    - target: {fileID: 513016993908548068, guid: 5d2861abd75e51f4c8f9ff1fce3e8431, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 252a6d3880afed346995d91308cb2b3b, type: 2}
+    - target: {fileID: 513016993908548068, guid: 5d2861abd75e51f4c8f9ff1fce3e8431, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 513016993908548068, guid: 5d2861abd75e51f4c8f9ff1fce3e8431, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2381653083942487344, guid: 252a6d3880afed346995d91308cb2b3b, type: 2}
+    - target: {fileID: 513016993908548068, guid: 5d2861abd75e51f4c8f9ff1fce3e8431, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1758481467005006778, guid: 5d2861abd75e51f4c8f9ff1fce3e8431, type: 3}
       propertyPath: m_Camera
